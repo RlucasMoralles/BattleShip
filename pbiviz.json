@@ -1,0 +1,24 @@
+{
+  "visual": {
+    "name": "CampoMinadoVisual",
+    "displayName": "Campo Minado - Gerador PDF",
+    "guid": "CampoMinadoVisual935AC3B6B8694B999B89E2F5BDB8D10E",
+    "visualClassName": "Visual",
+    "version": "1.0.0.0",
+    "description": "Visual customizado que gera PDFs de Campo Minado por vendedor e categoria",
+    "supportedFeatures": {
+      "tooltips": false,
+      "advancedEditMode": true
+    },
+    "iconPath": "assets/icon.png",
+    "author": {
+      "name": "Lucas Pereira",
+      "email": "lucas.pereira@example.com"
+    }
+  },
+  "apiVersion": "5.1.0",
+  "style": "style/visual.less",
+  "capabilities": "capabilities.json",
+  "dependencies": null,
+  "stringResources": []
+}

@@ -21,21 +21,6 @@
       "kind": "Grouping"
     },
     {
-      "displayName": "Bairro",
-      "name": "bairro",
-      "kind": "Grouping"
-    },
-    {
-      "displayName": "Cidade",
-      "name": "cidade",
-      "kind": "Grouping"
-    },
-    {
-      "displayName": "Título do Relatório",
-      "name": "titulo",
-      "kind": "Grouping"
-    },
-    {
       "displayName": "Código Produto",
       "name": "codProduto",
       "kind": "Grouping"
@@ -74,21 +59,6 @@
             {
               "for": {
                 "in": "nomeCliente"
-              }
-            },
-            {
-              "for": {
-                "in": "bairro"
-              }
-            },
-            {
-              "for": {
-                "in": "cidade"
-              }
-            },
-            {
-              "for": {
-                "in": "titulo"
               }
             },
             {
@@ -139,20 +109,5 @@
         }
       }
     }
-  },
-  "privileges": [
-    {
-      "name": "ExportContent",
-      "essential": true
-    },
-    {
-      "name": "WebAccess",
-      "essential": true,
-      "parameters": [
-        "https://campo-minado-api-36a6b9dc1720.herokuapp.com",
-        "https://*.herokuapp.com",
-        "https://campo-minado-api.herokuapp.com"
-      ]
-    }
-  ]
+  }
 }

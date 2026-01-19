@@ -1,0 +1,31 @@
+{
+  "name": "campominadovisual",
+  "version": "1.0.0",
+  "description": "Power BI Custom Visual - Campo Minado PDF Generator",
+  "scripts": {
+    "pbiviz": "pbiviz",
+    "start": "pbiviz start",
+    "package": "pbiviz package",
+    "test": "echo \"No tests yet\""
+  },
+  "keywords": [
+    "powerbi",
+    "custom-visual",
+    "pdf"
+  ],
+  "author": "Lucas Pereira",
+  "license": "MIT",
+  "dependencies": {
+    "jspdf": "^2.5.1",
+    "jszip": "^3.10.1",
+    "powerbi-visuals-api": "~5.1.0",
+    "powerbi-visuals-utils-dataviewutils": "^3.0.0",
+    "powerbi-visuals-utils-formattingutils": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/d3": "^7.4.0",
+    "d3": "^7.8.5",
+    "powerbi-visuals-tools": "^5.0.0",
+    "typescript": "^4.9.5"
+  }
+}

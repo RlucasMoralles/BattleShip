@@ -9,6 +9,7 @@ import { PDFGenerator } from "./pdfGenerator";
 export class Visual implements IVisual {
     private target: HTMLElement;
     private host: IVisualHost;
+    private emailInput: HTMLInputElement;
     private button: HTMLButtonElement;
     private statusText: HTMLDivElement;
     private dataView: DataView;
@@ -31,9 +32,48 @@ export class Visual implements IVisual {
             font-family: 'Segoe UI', Arial, sans-serif;
         `;
 
-        // Criar botão de download
+        // Título
+        const title = document.createElement("div");
+        title.textContent = "📊 Campo Minado - Gerador de PDFs";
+        title.style.cssText = `
+            font-size: 20px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 20px;
+        `;
+
+        // Campo de e-mail
+        const emailLabel = document.createElement("label");
+        emailLabel.textContent = "E-mail para receber o arquivo:";
+        emailLabel.style.cssText = `
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        `;
+
+        this.emailInput = document.createElement("input");
+        this.emailInput.type = "email";
+        this.emailInput.placeholder = "seu@email.com";
+        this.emailInput.style.cssText = `
+            padding: 12px;
+            font-size: 14px;
+            width: 300px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            outline: none;
+            margin-bottom: 20px;
+            transition: border-color 0.3s;
+        `;
+        this.emailInput.onfocus = () => {
+            this.emailInput.style.borderColor = "#667eea";
+        };
+        this.emailInput.onblur = () => {
+            this.emailInput.style.borderColor = "#e0e0e0";
+        };
+
+        // Criar botão de enviar
         this.button = document.createElement("button");
-        this.button.textContent = "📥 Baixar Base";
+        this.button.textContent = "📧 Enviar por E-mail";
         this.button.style.cssText = `
             padding: 15px 30px;
             font-size: 16px;
@@ -58,7 +98,7 @@ export class Visual implements IVisual {
             this.button.style.boxShadow = "0 4px 15px rgba(102, 126, 234, 0.4)";
         };
 
-        this.button.onclick = () => this.downloadPDFs();
+        this.button.onclick = () => this.sendEmail();
 
         // Criar texto de status
         this.statusText = document.createElement("div");
@@ -67,8 +107,12 @@ export class Visual implements IVisual {
             font-size: 14px;
             color: #666;
             text-align: center;
+            max-width: 400px;
         `;
 
+        container.appendChild(title);
+        container.appendChild(emailLabel);
+        container.appendChild(this.emailInput);
         container.appendChild(this.button);
         container.appendChild(this.statusText);
         this.target.appendChild(container);
@@ -86,72 +130,89 @@ export class Visual implements IVisual {
         }
 
         const rowCount = this.dataView.table.rows.length;
-        this.statusText.textContent = `✅ ${rowCount} registros carregados. Clique para gerar os PDFs.`;
+        this.statusText.textContent = `✅ ${rowCount} registros prontos. Digite seu e-mail e clique em enviar.`;
         this.button.disabled = false;
         this.button.style.opacity = "1";
         this.button.style.cursor = "pointer";
     }
 
-    private async downloadPDFs() {
-        console.log("=== Início do download de PDFs ===");
-        console.log("Navegador:", navigator.userAgent);
-        console.log("Power BI host:", this.host);
+    private async sendEmail() {
+        console.log("=== Início do envio de e-mail ===");
+        
+        // Validar e-mail
+        const email = this.emailInput.value.trim();
+        if (!email) {
+            this.statusText.textContent = "❌ Por favor, digite um e-mail";
+            this.statusText.style.color = "#d32f2f";
+            return;
+        }
+
+        if (!email.includes('@') || !email.includes('.')) {
+            this.statusText.textContent = "❌ E-mail inválido";
+            this.statusText.style.color = "#d32f2f";
+            return;
+        }
         
         if (!this.dataView || !this.dataView.table) {
             console.error("Nenhum dado disponível!");
             this.statusText.textContent = "❌ Nenhum dado disponível";
+            this.statusText.style.color = "#d32f2f";
             return;
         }
 
         console.log("Dados disponíveis:", this.dataView.table.rows.length, "linhas");
-        console.log("Colunas:", this.dataView.table.columns.map(c => c.displayName));
 
         this.button.disabled = true;
-        this.button.textContent = "⏳ Gerando PDFs...";
-        this.statusText.textContent = "Preparando dados...";
+        this.button.textContent = "⏳ Enviando...";
+        this.statusText.textContent = "Processando dados...";
+        this.statusText.style.color = "#666";
 
         try {
             // Extrair dados do dataView
-            console.log("Extraindo dados do dataView...");
             const data = this.extractDataForAPI(this.dataView);
             console.log("Dados extraídos:", data.length, "registros");
             
-            // URL da API no Heroku
-            const API_URL = 'https://campo-minado-api.herokuapp.com/api/generate-pdfs';
-            
-            console.log("Enviando para API via form POST:", API_URL);
             this.statusText.textContent = "Enviando para servidor...";
             
-            // Criar form para POST (bypass CSP)
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = API_URL;
-            form.target = '_blank'; // Abre em nova aba
-            form.style.display = 'none';
+            // Usar XMLHttpRequest ao invés de fetch
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', 'https://campo-minado-api-36a6b9dc1720.herokuapp.com/api/send-email', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
             
-            // Adicionar dados como campo hidden
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'data';
-            input.value = JSON.stringify(data);
-            form.appendChild(input);
+            xhr.onload = () => {
+                console.log('Resposta recebida:', xhr.status);
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    this.statusText.textContent = "✅ E-mail enviado com sucesso! Verifique sua caixa de entrada.";
+                    this.statusText.style.color = "#388e3c";
+                    this.button.textContent = "✅ Enviado!";
+                } else {
+                    throw new Error(`Erro HTTP: ${xhr.status}`);
+                }
+                
+                setTimeout(() => {
+                    this.button.textContent = "📧 Enviar por E-mail";
+                    this.button.disabled = false;
+                }, 3000);
+            };
             
-            // Adicionar ao DOM e submeter
-            document.body.appendChild(form);
-            form.submit();
-            document.body.removeChild(form);
+            xhr.onerror = () => {
+                console.error('Erro na requisição');
+                throw new Error('Erro ao conectar com o servidor');
+            };
             
-            console.log("Form submetido com sucesso");
-            this.statusText.textContent = "✅ Solicitação enviada! O download começará em uma nova aba.";
+            const payload = JSON.stringify({
+                email: email,
+                data: data
+            });
+            
+            console.log('Enviando via XMLHttpRequest...');
+            xhr.send(payload);
 
-            this.button.textContent = "📥 Baixar Base";
-            this.button.disabled = false;
-            console.log("=== Processo finalizado ===");
         } catch (error) {
-            console.error("=== ERRO ao gerar PDFs ===", error);
-            console.error("Stack trace:", error.stack);
+            console.error("=== ERRO ao enviar e-mail ===", error);
             this.statusText.textContent = `❌ Erro: ${error.message}`;
-            this.button.textContent = "📥 Baixar Base";
+            this.statusText.style.color = "#d32f2f";
+            this.button.textContent = "📧 Enviar por E-mail";
             this.button.disabled = false;
         }
     }
@@ -166,6 +227,9 @@ export class Visual implements IVisual {
             classeProduto: -1,
             codCliente: -1,
             nomeCliente: -1,
+            bairro: -1,
+            cidade: -1,
+            titulo: -1,
             codProduto: -1,
             nomeProduto: -1,
             qtVendida: -1
@@ -178,6 +242,9 @@ export class Visual implements IVisual {
             if (roleName["classeProduto"]) columnMap.classeProduto = idx;
             if (roleName["codCliente"]) columnMap.codCliente = idx;
             if (roleName["nomeCliente"]) columnMap.nomeCliente = idx;
+            if (roleName["bairro"]) columnMap.bairro = idx;
+            if (roleName["cidade"]) columnMap.cidade = idx;
+            if (roleName["titulo"]) columnMap.titulo = idx;
             if (roleName["codProduto"]) columnMap.codProduto = idx;
             if (roleName["nomeProduto"]) columnMap.nomeProduto = idx;
             if (roleName["qtVendida"]) columnMap.qtVendida = idx;
@@ -188,6 +255,9 @@ export class Visual implements IVisual {
             classeProduto: row[columnMap.classeProduto]?.toString() || "",
             codCliente: row[columnMap.codCliente]?.toString() || "",
             nomeCliente: row[columnMap.nomeCliente]?.toString() || "",
+            bairro: row[columnMap.bairro]?.toString() || "",
+            cidade: row[columnMap.cidade]?.toString() || "",
+            titulo: row[columnMap.titulo]?.toString() || "",
             codProduto: row[columnMap.codProduto]?.toString() || "",
             nomeProduto: row[columnMap.nomeProduto]?.toString() || "",
             qtVendida: Number(row[columnMap.qtVendida]) || 0
