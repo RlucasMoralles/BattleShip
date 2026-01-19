@@ -1,0 +1,126 @@
+{
+  "dataRoles": [
+    {
+      "displayName": "Código Vendedor",
+      "name": "codVendedor",
+      "kind": "Grouping"
+    },
+    {
+      "displayName": "Classe Produto",
+      "name": "classeProduto",
+      "kind": "Grouping"
+    },
+    {
+      "displayName": "Código Cliente",
+      "name": "codCliente",
+      "kind": "Grouping"
+    },
+    {
+      "displayName": "Nome Cliente",
+      "name": "nomeCliente",
+      "kind": "Grouping"
+    },
+    {
+      "displayName": "Código Produto",
+      "name": "codProduto",
+      "kind": "Grouping"
+    },
+    {
+      "displayName": "Nome Produto",
+      "name": "nomeProduto",
+      "kind": "Grouping"
+    },
+    {
+      "displayName": "Quantidade Vendida",
+      "name": "qtVendida",
+      "kind": "Measure"
+    }
+  ],
+  "dataViewMappings": [
+    {
+      "table": {
+        "rows": {
+          "select": [
+            {
+              "for": {
+                "in": "codVendedor"
+              }
+            },
+            {
+              "for": {
+                "in": "classeProduto"
+              }
+            },
+            {
+              "for": {
+                "in": "codCliente"
+              }
+            },
+            {
+              "for": {
+                "in": "nomeCliente"
+              }
+            },
+            {
+              "for": {
+                "in": "codProduto"
+              }
+            },
+            {
+              "for": {
+                "in": "nomeProduto"
+              }
+            },
+            {
+              "for": {
+                "in": "qtVendida"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "objects": {
+    "general": {
+      "displayName": "Geral",
+      "properties": {
+        "buttonText": {
+          "displayName": "Texto do Botão",
+          "type": {
+            "text": true
+          }
+        },
+        "buttonColor": {
+          "displayName": "Cor do Botão",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "fontSize": {
+          "displayName": "Tamanho da Fonte PDF",
+          "type": {
+            "numeric": true
+          }
+        }
+      }
+    }
+  },
+  "privileges": [
+    {
+      "name": "ExportContent",
+      "essential": true
+    },
+    {
+      "name": "WebAccess",
+      "essential": true,
+      "parameters": [
+        "https://campo-minado-api.herokuapp.com"
+      ]
+    }
+  ]
+}
