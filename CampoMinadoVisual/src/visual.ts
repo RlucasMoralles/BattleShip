@@ -132,6 +132,7 @@ export class Visual implements IVisual {
 
         if (!this.dataView || !this.dataView.table) {
             this.statusText.textContent = "⚠️ Arraste os campos necessários para o visual";
+            this.statusText.style.color = "#ff6b6b";
             this.button.disabled = true;
             this.button.style.opacity = "0.5";
             this.button.style.cursor = "not-allowed";
@@ -139,10 +140,32 @@ export class Visual implements IVisual {
         }
 
         const rowCount = this.dataView.table.rows.length;
-        this.statusText.textContent = `✅ ${rowCount} registros prontos. Digite seu e-mail e clique em enviar.`;
+        
+        // Verificar se excede o limite de 10.000 linhas
+        if (rowCount > 10000) {
+            this.statusText.innerHTML = `
+                <strong style="color: #e74c3c;">❌ LIMITE EXCEDIDO!</strong><br>
+                <span style="color: #e74c3c;">Atualmente: ${rowCount.toLocaleString('pt-BR')} linhas</span><br>
+                <span style="color: #666;">Máximo permitido: 10.000 linhas</span><br>
+                <span style="color: #666; font-size: 12px;">Por favor, aplique filtros para reduzir os dados.</span>
+            `;
+            this.button.disabled = true;
+            this.button.style.opacity = "0.5";
+            this.button.style.cursor = "not-allowed";
+            this.button.style.background = "linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)";
+            return;
+        }
+        
+        // Dados dentro do limite
+        this.statusText.innerHTML = `
+            <span style="color: #27ae60;"><strong>✅ ${rowCount.toLocaleString('pt-BR')} linhas carregadas</strong></span><br>
+            <span style="color: #666; font-size: 12px;">Digite seu e-mail e clique em enviar</span>
+        `;
+        this.statusText.style.color = "#27ae60";
         this.button.disabled = false;
         this.button.style.opacity = "1";
         this.button.style.cursor = "pointer";
+        this.button.style.background = "linear-gradient(135deg, #667eea 0%, #764ba2 100%)";
     }
 
     private async sendEmail() {
@@ -180,49 +203,78 @@ export class Visual implements IVisual {
             // Extrair dados do dataView
             const data = this.extractDataForAPI(this.dataView);
             console.log("Dados extraídos:", data.length, "registros");
+            console.log("Primeiro registro:", data[0]);
             
             this.statusText.textContent = "Enviando para servidor...";
             
-            const payload = {
-                email: email,
-                data: data
-            };
-            
-            console.log('Enviando dados via fetch...');
-            
-            // Usar a função fetchMoreData do host do Power BI para contornar CORS
+            // Usar XMLHttpRequest com configurações para Power BI Desktop
+            const xhr = new XMLHttpRequest();
             const url = 'https://campo-minado-api-36a6b9dc1720.herokuapp.com/api/send-email';
             
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(payload),
-                mode: 'cors'
-            })
-            .then(response => {
-                console.log('Resposta recebida:', response.status);
-                if (!response.ok) {
-                    throw new Error(`Erro HTTP: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(result => {
-                console.log('Sucesso:', result);
-                this.statusText.textContent = "✅ E-mail enviado com sucesso! Verifique sua caixa de entrada.";
-                this.statusText.style.color = "#388e3c";
-                this.button.textContent = "✅ Enviado!";
+            xhr.open('POST', url, true);
+            
+            // Headers necessários
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.setRequestHeader('Accept', 'application/json');
+            
+            // Não usar withCredentials para evitar problemas com CORS
+            xhr.withCredentials = false;
+            
+            // Timeout de 60 segundos
+            xhr.timeout = 60000;
+            
+            xhr.onreadystatechange = () => {
+                console.log('ReadyState changed to:', xhr.readyState, 'Status:', xhr.status);
+            };
+            
+            xhr.onload = () => {
+                console.log('Requisição completa!');
+                console.log('Status:', xhr.status);
+                console.log('Response:', xhr.responseText);
                 
-                setTimeout(() => {
-                    this.button.textContent = "📧 Enviar por E-mail";
-                    this.button.disabled = false;
-                }, 3000);
-            })
-            .catch(error => {
-                console.error('Erro:', error);
-                throw error;
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    this.statusText.textContent = "✅ E-mail enviado com sucesso! Verifique sua caixa de entrada.";
+                    this.statusText.style.color = "#388e3c";
+                    this.button.textContent = "✅ Enviado!";
+                    
+                    setTimeout(() => {
+                        this.button.textContent = "📧 Enviar por E-mail";
+                        this.button.disabled = false;
+                    }, 3000);
+                } else {
+                    console.error('Erro HTTP:', xhr.status, xhr.responseText);
+                    throw new Error(`Erro HTTP: ${xhr.status} - ${xhr.statusText}`);
+                }
+            };
+            
+            xhr.onerror = (e) => {
+                console.error('===== ERRO na requisição XMLHttpRequest =====');
+                console.error('Event:', e);
+                console.error('ReadyState:', xhr.readyState);
+                console.error('Status:', xhr.status);
+                console.error('StatusText:', xhr.statusText);
+                console.error('ResponseText:', xhr.responseText);
+                throw new Error('Erro ao conectar com o servidor. Verifique se a API está acessível.');
+            };
+            
+            xhr.ontimeout = () => {
+                console.error('Timeout na requisição');
+                throw new Error('Tempo limite excedido. Tente novamente.');
+            };
+            
+            const payload = JSON.stringify({
+                email: email,
+                data: data
             });
+            
+            console.log('===== Enviando requisição =====');
+            console.log('URL:', url);
+            console.log('Método: POST');
+            console.log('Tamanho do payload:', payload.length, 'caracteres');
+            console.log('Número de registros:', data.length);
+            
+            xhr.send(payload);
+            console.log('XMLHttpRequest.send() executado');
 
         } catch (error) {
             console.error("=== ERRO ao enviar e-mail ===", error);

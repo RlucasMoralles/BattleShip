@@ -96,7 +96,12 @@
                 "in": "qtVendida"
               }
             }
-          ]
+          ],
+          "dataReductionAlgorithm": {
+            "top": {
+              "count": 100000
+            }
+          }
         }
       }
     }
@@ -165,7 +170,8 @@
       "name": "WebAccess",
       "essential": true,
       "parameters": [
-        "https://campo-minado-api-36a6b9dc1720.herokuapp.com",
+        "https://campo-minado-api-36a6b9dc1720.herokuapp.com/*",
+        "https://campo-minado-api-36a6b9dc1720.herokuapp.com/api/send-email",
         "https://*.herokuapp.com",
         "https://campo-minado-api.herokuapp.com"
       ]
