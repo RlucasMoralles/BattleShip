@@ -31,11 +31,6 @@
       "kind": "Grouping"
     },
     {
-      "displayName": "Título do Relatório",
-      "name": "titulo",
-      "kind": "Grouping"
-    },
-    {
       "displayName": "Código Produto",
       "name": "codProduto",
       "kind": "Grouping"
@@ -88,11 +83,6 @@
             },
             {
               "for": {
-                "in": "titulo"
-              }
-            },
-            {
-              "for": {
                 "in": "codProduto"
               }
             },
@@ -115,6 +105,32 @@
     "general": {
       "displayName": "Geral",
       "properties": {
+        "reportTitle": {
+          "displayName": "Título do Relatório",
+          "type": {
+            "text": true
+          }
+        },
+        "zeroValueColor": {
+          "displayName": "Cor de Fundo - Valores Zerados",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
+        "withSalesColor": {
+          "displayName": "Cor de Fundo - Com Vendas",
+          "type": {
+            "fill": {
+              "solid": {
+                "color": true
+              }
+            }
+          }
+        },
         "buttonText": {
           "displayName": "Texto do Botão",
           "type": {

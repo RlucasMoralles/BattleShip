@@ -5,6 +5,8 @@ import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import IVisualHost = powerbi.extensibility.visual.IVisualHost;
 import DataView = powerbi.DataView;
 import { PDFGenerator } from "./pdfGenerator";
+import { VisualFormattingSettingsModel } from "./settings";
+import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel";
 
 export class Visual implements IVisual {
     private target: HTMLElement;
@@ -14,11 +16,14 @@ export class Visual implements IVisual {
     private statusText: HTMLDivElement;
     private dataView: DataView;
     private pdfGenerator: PDFGenerator;
+    private formattingSettings: VisualFormattingSettingsModel;
+    private formattingSettingsService: FormattingSettingsService;
 
     constructor(options: VisualConstructorOptions) {
         this.target = options.element;
         this.host = options.host;
         this.pdfGenerator = new PDFGenerator();
+        this.formattingSettingsService = new FormattingSettingsService();
 
         // Criar container principal
         const container = document.createElement("div");
@@ -120,6 +125,10 @@ export class Visual implements IVisual {
 
     public update(options: VisualUpdateOptions) {
         this.dataView = options.dataViews && options.dataViews[0];
+        
+        if (this.dataView) {
+            this.formattingSettings = this.formattingSettingsService.populateFormattingSettingsModel(VisualFormattingSettingsModel, this.dataView);
+        }
 
         if (!this.dataView || !this.dataView.table) {
             this.statusText.textContent = "⚠️ Arraste os campos necessários para o visual";
@@ -229,7 +238,6 @@ export class Visual implements IVisual {
             nomeCliente: -1,
             bairro: -1,
             cidade: -1,
-            titulo: -1,
             codProduto: -1,
             nomeProduto: -1,
             qtVendida: -1
@@ -244,12 +252,15 @@ export class Visual implements IVisual {
             if (roleName["nomeCliente"]) columnMap.nomeCliente = idx;
             if (roleName["bairro"]) columnMap.bairro = idx;
             if (roleName["cidade"]) columnMap.cidade = idx;
-            if (roleName["titulo"]) columnMap.titulo = idx;
             if (roleName["codProduto"]) columnMap.codProduto = idx;
             if (roleName["nomeProduto"]) columnMap.nomeProduto = idx;
             if (roleName["qtVendida"]) columnMap.qtVendida = idx;
         });
 
+        const reportTitle = this.formattingSettings?.generalCard?.reportTitle?.value || "Relatório de Vendas";
+        const zeroValueColor = this.formattingSettings?.generalCard?.zeroValueColor?.value?.value || "#FFFFFF";
+        const withSalesColor = this.formattingSettings?.generalCard?.withSalesColor?.value?.value || "#90EE90";
+        
         return rows.map(row => ({
             codVendedor: row[columnMap.codVendedor]?.toString() || "",
             classeProduto: row[columnMap.classeProduto]?.toString() || "",
@@ -257,10 +268,16 @@ export class Visual implements IVisual {
             nomeCliente: row[columnMap.nomeCliente]?.toString() || "",
             bairro: row[columnMap.bairro]?.toString() || "",
             cidade: row[columnMap.cidade]?.toString() || "",
-            titulo: row[columnMap.titulo]?.toString() || "",
+            titulo: reportTitle,
+            zeroValueColor: zeroValueColor,
+            withSalesColor: withSalesColor,
             codProduto: row[columnMap.codProduto]?.toString() || "",
             nomeProduto: row[columnMap.nomeProduto]?.toString() || "",
             qtVendida: Number(row[columnMap.qtVendida]) || 0
         }));
+    }
+
+    public getFormattingModel(): powerbi.visuals.FormattingModel {
+        return this.formattingSettingsService.buildFormattingModel(this.formattingSettings);
     }
 }

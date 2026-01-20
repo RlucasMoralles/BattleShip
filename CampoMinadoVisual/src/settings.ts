@@ -33,6 +33,34 @@ import FormattingSettingsSlice = formattingSettings.Slice;
 import FormattingSettingsModel = formattingSettings.Model;
 
 /**
+ * General Settings Card
+ */
+class GeneralCardSettings extends FormattingSettingsCard {
+    reportTitle = new formattingSettings.TextInput({
+        name: "reportTitle",
+        displayName: "Título do Relatório",
+        value: "Relatório de Vendas",
+        placeholder: "Digite o título do relatório"
+    });
+
+    zeroValueColor = new formattingSettings.ColorPicker({
+        name: "zeroValueColor",
+        displayName: "Cor de Fundo - Valores Zerados",
+        value: { value: "#FFFFFF" }
+    });
+
+    withSalesColor = new formattingSettings.ColorPicker({
+        name: "withSalesColor",
+        displayName: "Cor de Fundo - Com Vendas",
+        value: { value: "#90EE90" }
+    });
+
+    name: string = "general";
+    displayName: string = "Geral";
+    slices: Array<FormattingSettingsSlice> = [this.reportTitle, this.zeroValueColor, this.withSalesColor];
+}
+
+/**
  * Data Point Formatting Card
  */
 class DataPointCardSettings extends FormattingSettingsCard {
@@ -77,7 +105,8 @@ class DataPointCardSettings extends FormattingSettingsCard {
 */
 export class VisualFormattingSettingsModel extends FormattingSettingsModel {
     // Create formatting settings model formatting cards
+    generalCard = new GeneralCardSettings();
     dataPointCard = new DataPointCardSettings();
 
-    cards = [this.dataPointCard];
+    cards = [this.generalCard, this.dataPointCard];
 }
