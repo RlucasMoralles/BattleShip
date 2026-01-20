@@ -183,39 +183,46 @@ export class Visual implements IVisual {
             
             this.statusText.textContent = "Enviando para servidor...";
             
-            // Usar XMLHttpRequest ao invés de fetch
-            const xhr = new XMLHttpRequest();
-            xhr.open('POST', 'https://campo-minado-api-36a6b9dc1720.herokuapp.com/api/send-email', true);
-            xhr.setRequestHeader('Content-Type', 'application/json');
+            const payload = {
+                email: email,
+                data: data
+            };
             
-            xhr.onload = () => {
-                console.log('Resposta recebida:', xhr.status);
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    this.statusText.textContent = "✅ E-mail enviado com sucesso! Verifique sua caixa de entrada.";
-                    this.statusText.style.color = "#388e3c";
-                    this.button.textContent = "✅ Enviado!";
-                } else {
-                    throw new Error(`Erro HTTP: ${xhr.status}`);
+            console.log('Enviando dados via fetch...');
+            
+            // Usar a função fetchMoreData do host do Power BI para contornar CORS
+            const url = 'https://campo-minado-api-36a6b9dc1720.herokuapp.com/api/send-email';
+            
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+                mode: 'cors'
+            })
+            .then(response => {
+                console.log('Resposta recebida:', response.status);
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP: ${response.status}`);
                 }
+                return response.json();
+            })
+            .then(result => {
+                console.log('Sucesso:', result);
+                this.statusText.textContent = "✅ E-mail enviado com sucesso! Verifique sua caixa de entrada.";
+                this.statusText.style.color = "#388e3c";
+                this.button.textContent = "✅ Enviado!";
                 
                 setTimeout(() => {
                     this.button.textContent = "📧 Enviar por E-mail";
                     this.button.disabled = false;
                 }, 3000);
-            };
-            
-            xhr.onerror = () => {
-                console.error('Erro na requisição');
-                throw new Error('Erro ao conectar com o servidor');
-            };
-            
-            const payload = JSON.stringify({
-                email: email,
-                data: data
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                throw error;
             });
-            
-            console.log('Enviando via XMLHttpRequest...');
-            xhr.send(payload);
 
         } catch (error) {
             console.error("=== ERRO ao enviar e-mail ===", error);
