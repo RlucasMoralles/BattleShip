@@ -141,12 +141,12 @@ export class Visual implements IVisual {
 
         const rowCount = this.dataView.table.rows.length;
         
-        // Verificar se excede o limite de 10.000 linhas
-        if (rowCount > 10000) {
+        // Verificar se excede o limite de 20.000 linhas
+        if (rowCount > 20000) {
             this.statusText.innerHTML = `
                 <strong style="color: #e74c3c;">❌ LIMITE EXCEDIDO!</strong><br>
                 <span style="color: #e74c3c;">Atualmente: ${rowCount.toLocaleString('pt-BR')} linhas</span><br>
-                <span style="color: #666;">Máximo permitido: 10.000 linhas</span><br>
+                <span style="color: #666;">Máximo permitido: 20.000 linhas</span><br>
                 <span style="color: #666; font-size: 12px;">Por favor, aplique filtros para reduzir os dados.</span>
             `;
             this.button.disabled = true;
@@ -292,6 +292,7 @@ export class Visual implements IVisual {
 
         const columnMap = {
             codVendedor: -1,
+            nomeVendedor: -1,
             classeProduto: -1,
             codCliente: -1,
             nomeCliente: -1,
@@ -299,13 +300,16 @@ export class Visual implements IVisual {
             cidade: -1,
             codProduto: -1,
             nomeProduto: -1,
-            qtVendida: -1
+            qtVendida: -1,
+            qtdProdutosPositivados: -1,
+            qtdProdutosObjetivo: -1
         };
 
         // Mapear índices das colunas
         columns.forEach((col, idx) => {
             const roleName = col.roles;
             if (roleName["codVendedor"]) columnMap.codVendedor = idx;
+            if (roleName["nomeVendedor"]) columnMap.nomeVendedor = idx;
             if (roleName["classeProduto"]) columnMap.classeProduto = idx;
             if (roleName["codCliente"]) columnMap.codCliente = idx;
             if (roleName["nomeCliente"]) columnMap.nomeCliente = idx;
@@ -314,6 +318,8 @@ export class Visual implements IVisual {
             if (roleName["codProduto"]) columnMap.codProduto = idx;
             if (roleName["nomeProduto"]) columnMap.nomeProduto = idx;
             if (roleName["qtVendida"]) columnMap.qtVendida = idx;
+            if (roleName["qtdProdutosPositivados"]) columnMap.qtdProdutosPositivados = idx;
+            if (roleName["qtdProdutosObjetivo"]) columnMap.qtdProdutosObjetivo = idx;
         });
 
         const reportTitle = this.formattingSettings?.generalCard?.reportTitle?.value || "Relatório de Vendas";
@@ -322,6 +328,7 @@ export class Visual implements IVisual {
         
         return rows.map(row => ({
             codVendedor: row[columnMap.codVendedor]?.toString() || "",
+            nomeVendedor: row[columnMap.nomeVendedor]?.toString() || row[columnMap.codVendedor]?.toString() || "",
             classeProduto: row[columnMap.classeProduto]?.toString() || "",
             codCliente: row[columnMap.codCliente]?.toString() || "",
             nomeCliente: row[columnMap.nomeCliente]?.toString() || "",
@@ -332,7 +339,9 @@ export class Visual implements IVisual {
             withSalesColor: withSalesColor,
             codProduto: row[columnMap.codProduto]?.toString() || "",
             nomeProduto: row[columnMap.nomeProduto]?.toString() || "",
-            qtVendida: Number(row[columnMap.qtVendida]) || 0
+            qtVendida: Number(row[columnMap.qtVendida]) || 0,
+            qtdProdutosPositivados: Number(row[columnMap.qtdProdutosPositivados]) || 0,
+            qtdProdutosObjetivo: Number(row[columnMap.qtdProdutosObjetivo]) || 0
         }));
     }
 

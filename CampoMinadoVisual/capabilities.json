@@ -6,6 +6,11 @@
       "kind": "Grouping"
     },
     {
+      "displayName": "Nome Vendedor",
+      "name": "nomeVendedor",
+      "kind": "Grouping"
+    },
+    {
       "displayName": "Classe Produto",
       "name": "classeProduto",
       "kind": "Grouping"
@@ -43,6 +48,16 @@
     {
       "displayName": "Quantidade Vendida",
       "name": "qtVendida",
+      "kind": "Measure"
+    },
+    {
+      "displayName": "Qtd Produtos Positivados",
+      "name": "qtdProdutosPositivados",
+      "kind": "Measure"
+    },
+    {
+      "displayName": "Qtd Produtos Objetivo",
+      "name": "qtdProdutosObjetivo",
       "kind": "Measure"
     }
   ],
@@ -94,6 +109,16 @@
             {
               "for": {
                 "in": "qtVendida"
+              }
+            },
+            {
+              "for": {
+                "in": "qtdProdutosPositivados"
+              }
+            },
+            {
+              "for": {
+                "in": "qtdProdutosObjetivo"
               }
             }
           ],
